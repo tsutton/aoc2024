@@ -1,8 +1,9 @@
-const EXAMPLE: &str = "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))";
-
 use std::{fs::File, io::Read};
 
+use once_cell::sync::Lazy;
 use regex::Regex;
+
+const EXAMPLE: &str = "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))";
 
 fn read_input() -> String {
     let mut r = String::new();
@@ -33,6 +34,8 @@ impl Iterator for Parser<'_> {
 
     fn next(&mut self) -> Option<Self::Item> {
         // println!("{}", self.input);
+        static RE: Lazy<Regex> = Lazy::new(|| Regex::new(r#"^mul\((\d+),(\d+)\)"#).unwrap());
+
         if self.input.is_empty() {
             None
         } else if self.input.starts_with("do()") {
@@ -42,8 +45,7 @@ impl Iterator for Parser<'_> {
             self.input = &self.input["don't()".len()..];
             Some(Instruction::Dont)
         } else {
-            let muls_regex = Regex::new(r#"^mul\((\d+),(\d+)\)"#).unwrap();
-            if let Some(capture) = muls_regex.captures(self.input) {
+            if let Some(capture) = RE.captures(self.input) {
                 self.input = &self.input[capture.len()..];
                 Some(Instruction::Mul(
                     capture.get(1).unwrap().as_str().parse::<i64>().unwrap(),
@@ -76,7 +78,7 @@ pub fn part2() -> i64 {
     let mut interpreter = Interpreter { enabled: true };
     let mut ans = 0;
     for instr in parser {
-        println!("{:?}", instr);
+        // println!("{:?}", instr);
         match instr {
             Instruction::Do => {
                 interpreter.enabled = true;

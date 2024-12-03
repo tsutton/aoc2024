@@ -1,5 +1,6 @@
 use std::{fs::File, io::Read};
 
+#[allow(dead_code)]
 const EXAMPLE: &str = r#"7 6 4 2 1
 1 2 7 8 9
 9 7 6 2 1

@@ -3,6 +3,7 @@ use std::{fs::File, io::Read};
 use once_cell::sync::Lazy;
 use regex::Regex;
 
+#[allow(dead_code)]
 const EXAMPLE: &str = "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))";
 
 fn read_input() -> String {
@@ -44,17 +45,15 @@ impl Iterator for Parser<'_> {
         } else if self.input.starts_with("don't()") {
             self.input = &self.input["don't()".len()..];
             Some(Instruction::Dont)
+        } else if let Some(capture) = RE.captures(self.input) {
+            self.input = &self.input[capture.len()..];
+            Some(Instruction::Mul(
+                capture.get(1).unwrap().as_str().parse::<i64>().unwrap(),
+                capture.get(2).unwrap().as_str().parse::<i64>().unwrap(),
+            ))
         } else {
-            if let Some(capture) = RE.captures(self.input) {
-                self.input = &self.input[capture.len()..];
-                Some(Instruction::Mul(
-                    capture.get(1).unwrap().as_str().parse::<i64>().unwrap(),
-                    capture.get(2).unwrap().as_str().parse::<i64>().unwrap(),
-                ))
-            } else {
-                self.input = &self.input[1..];
-                self.next()
-            }
+            self.input = &self.input[1..];
+            self.next()
         }
     }
 }
